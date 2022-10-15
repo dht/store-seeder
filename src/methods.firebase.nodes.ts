@@ -1,17 +1,21 @@
-import { firebase } from './methods.firebase.base';
-// import { firebase } from 'firestore-local';
-import { firebaseConfig } from '../../../firebaseConfig';
-import { ISeedStructure } from './types';
 import kleur from 'kleur';
+import { firebase } from './methods.firebase.base';
+import { FirebaseApp, FirebaseOptions } from 'firebase/app';
+import { Firestore } from 'firebase/firestore/lite';
+import { ISeedStructure } from './types';
 
 let globalState: Json = {};
 
 type Json = Record<string, any>;
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.getFirestore(app);
+let app: FirebaseApp, db: Firestore;
 
 const ts = () => new Date().toISOString();
+
+export const initFirebase = (firebaseConfig: FirebaseOptions) => {
+    app = firebase.initializeApp(firebaseConfig);
+    db = firebase.getFirestore(app);
+};
 
 const generateCreatedDate = () => ({
     _createdDate: ts(),
@@ -195,7 +199,7 @@ export const seed = async (data: Json, nodeTypes: ISeedStructure) => {
 export const nodeNameWithItemsCount = (
     nodeName: string,
     entityType: 'single' | 'collection' | 'groupedList',
-    totalLength: number = 20
+    totalLength: number = 30
 ) => {
     const dotsLength = totalLength - nodeName.length - 1;
 

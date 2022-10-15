@@ -1,1 +1,1 @@
-export { seed } from './methods.firebase.nodes';
+export { initFirebase, seed } from './methods.firebase.nodes';
