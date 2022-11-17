@@ -2,7 +2,7 @@ import kleur from 'kleur';
 import { firebase } from './methods.firebase.base';
 import { FirebaseApp, FirebaseOptions } from 'firebase/app';
 import { Firestore } from 'firebase/firestore/lite';
-import { ISeedStructure } from './types';
+import { ISeedOptions, ISeedStructure } from './types';
 
 let globalState: Json = {};
 
@@ -52,6 +52,11 @@ async function singleGet(nodeName: string) {
 function singlePatch(nodeName: string, data: Json) {
     const ref = firebase.doc(db, 'singles', nodeName);
     return firebase.setDoc(ref, withDates(data, false, true), { merge: true });
+}
+
+function singleDelete(nodeName: string) {
+    const ref = firebase.doc(db, 'singles', nodeName);
+    return firebase.deleteDoc(ref);
 }
 
 async function collectionGet(nodeName: string) {
@@ -150,10 +155,22 @@ const getByType = (nodeTypes: Json, nodeType: string) => {
         }) as [string, Json][];
 };
 
-export const seed = async (data: Json, nodeTypes: ISeedStructure) => {
+export const seed = async (
+    data: Json,
+    nodeTypes: ISeedStructure,
+    options: ISeedOptions
+) => {
+    const { clearNodes } = options;
+
     let promises: Promise<any>[];
 
     globalState = data;
+
+    if (clearNodes) {
+        console.time('clear');
+        await clear(nodeTypes);
+        console.timeEnd('clear');
+    }
 
     console.time('total');
     console.log(header('singles'));
@@ -231,4 +248,23 @@ export const header = (text: string, totalLength: number = 30) => {
             '='.repeat(dashesLengthRight),
         ].join('')
     );
+};
+
+export const clear = async (nodeTypes: ISeedStructure) => {
+    const promises: Promise<any>[] = [];
+
+    for (let nodeName of Object.keys(nodeTypes)) {
+        const nodeType = nodeTypes[nodeName];
+
+        if (nodeType === 'single') {
+            promises.push(singleDelete(nodeName));
+        } else {
+            const items = await collectionGet(nodeName);
+            const ids = items.map((item) => item.id);
+
+            promises.push(collectionDeleteMany(nodeName, ids));
+        }
+    }
+
+    await Promise.all(promises);
 };

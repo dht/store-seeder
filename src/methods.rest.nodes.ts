@@ -1,6 +1,6 @@
 import kleur from 'kleur';
 import { RequestBuilder, restAdapter } from './methods.rest.base';
-import { ISeedStructure } from './types';
+import { ISeedOptions, ISeedStructure } from './types';
 
 let globalState: Json = {};
 
@@ -134,7 +134,11 @@ const getByType = (nodeTypes: Json, nodeType: string) => {
         }) as [string, Json][];
 };
 
-export const seed = async (data: Json, nodeTypes: ISeedStructure) => {
+export const seed = async (
+    data: Json,
+    nodeTypes: ISeedStructure,
+    options: ISeedOptions
+) => {
     let promises: Promise<any>[];
 
     globalState = data;
