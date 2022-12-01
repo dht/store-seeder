@@ -10,8 +10,6 @@ export const seed = (
     destination: string,
     options: ISeedOptions = {}
 ) => {
-    console.log('destination ->', destination);
-
     switch (destination) {
         case 'FIREBASE':
             seedFirebase(data, nodeTypes, options);
